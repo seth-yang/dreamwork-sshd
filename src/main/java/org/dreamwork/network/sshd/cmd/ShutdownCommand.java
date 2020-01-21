@@ -24,15 +24,23 @@ public class ShutdownCommand extends Command {
         }
 
         if (server != null) {
-            console.println ();
+            console.eraseLine ();
+            int columns = "server will shutdown in 0 seconds".length ();
             for (int i = 3; i > 0; i -- ) {
-                console.eraseToBeginOfLine ();
+                console.moveLeft (columns);
                 console.setForegroundColor (TerminalIO.YELLOW);
                 console.print ("server will shutdown in " + i + " seconds");
                 console.setForegroundColor (TerminalIO.COLORINIT);
+                try {
+                    Thread.sleep (1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace ();
+                }
             }
+            console.println ();
             console.close ();
             server.unbind ();
         }
+        System.exit (0);
     }
 }

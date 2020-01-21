@@ -6,6 +6,7 @@ import org.dreamwork.db.IDatabase;
 import org.dreamwork.db.SQLite;
 import org.dreamwork.misc.AlgorithmUtil;
 import org.dreamwork.network.sshd.cmd.PasswordCommand;
+import org.dreamwork.network.sshd.cmd.ShutdownCommand;
 import org.dreamwork.network.sshd.cmd.UserCommand;
 import org.dreamwork.network.sshd.data.User;
 import org.dreamwork.network.sshd.data.schema.UserSchema;
@@ -22,8 +23,8 @@ import java.security.NoSuchAlgorithmException;
 import static org.dreamwork.network.sshd.Keys.CFG_DB_FILE;
 
 public class Sshd {
-    private static final Logger logger          = LoggerFactory.getLogger (Sshd.class);
-    private static final MainShellCommand shell = new MainShellCommand ();
+    private static final Logger logger = LoggerFactory.getLogger (Sshd.class);
+    private MainShellCommand shell     = new MainShellCommand ();
 
     private IConfiguration conf;
     private IDatabase database;
@@ -39,6 +40,7 @@ public class Sshd {
         } else {
             this.database = createDatabase (conf.getString (CFG_DB_FILE));
         }
+        shell.setDatabase (this.database);
 
         initDatabase ();
     }
@@ -52,12 +54,12 @@ public class Sshd {
         if (!dir.exists () && !dir.mkdirs ()) {
             logger.warn ("can't create dir: {}, falling down to default location", dir.getCanonicalPath ());
 
-            dir = new File (System.getProperty ("user.home"), ".dreamwork-sshd");
+            dir = new File (System.getProperty ("user.home"), ".ssh-server");
             if (!dir.exists () && !dir.mkdirs ()) {
                 logger.error ("this will never happen, but it does, shutdown the application");
                 throw new IOException ("init database fault");
             }
-            db = new File (dir, file);
+            db = new File (dir, "sshd-server.db");
         }
         return SQLite.get (db.getCanonicalPath ());
     }
@@ -101,7 +103,8 @@ public class Sshd {
         server.setShellFactory (channel -> shell);
         shell.registerCommands (
                 new PasswordCommand (database),
-                new UserCommand (database)
+                new UserCommand (database),
+                new ShutdownCommand (this)
         );
         server.start ();
 

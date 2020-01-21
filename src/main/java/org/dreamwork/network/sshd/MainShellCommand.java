@@ -6,6 +6,8 @@ import org.apache.sshd.server.Signal;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
 import org.dreamwork.concurrent.Looper;
+import org.dreamwork.db.IDatabase;
+import org.dreamwork.network.sshd.data.User;
 import org.dreamwork.telnet.ConnectionData;
 import org.dreamwork.telnet.Console;
 import org.dreamwork.telnet.SimpleCommandParser;
@@ -26,11 +28,23 @@ public class MainShellCommand implements Command {
     private OutputStream err;
 
     private Console console;
+    private IDatabase database;
 
     private CommandParser parser = new SimpleCommandParser (true);
-//    private Map<String, CommandWrapper> commandPool = new HashMap<> ();
 
     private final Logger logger = LoggerFactory.getLogger (MainShellCommand.class);
+
+    public MainShellCommand () {
+
+    }
+
+    public MainShellCommand (IDatabase database) {
+        this.database = database;
+    }
+
+    public void setDatabase (IDatabase database) {
+        this.database = database;
+    }
 
     @Override
     public void setInputStream (InputStream in) {
@@ -112,7 +126,14 @@ public class MainShellCommand implements Command {
             console = new Console (in, out, cd, true);
             console.setCommandParser (parser);
             for (Map.Entry<String, String> e : env.getEnv ().entrySet ()) {
-                console.setEnv (e.getKey (), e.getValue ());
+                String key = e.getKey ();
+                console.setEnv (key, e.getValue ());
+                if ("USER".equals (key)) {
+                    User user = database.getByPK (User.class, e.getValue ());
+                    if (user != null) {
+                        console.setAttribute ("user", user);
+                    }
+                }
             }
             Looper.invokeLater (() -> {
                 try {
@@ -134,12 +155,4 @@ public class MainShellCommand implements Command {
     void registerCommands (org.dreamwork.telnet.command.Command... commands) {
         parser.registerCommand (commands);
     }
-
-/*
-    private static final class CommandWrapper {
-        private String name;
-        private org.dreamwork.telnet.command.Command cmd;
-        private boolean registered;
-    }
-*/
 }

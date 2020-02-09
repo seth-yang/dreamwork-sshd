@@ -32,20 +32,21 @@ public class PasswordCommand extends Command {
     @Override
     public void perform (Console console) throws IOException {
         try {
-            String current = console.getEnv ("USER");
+//            String current = console.getEnv ("USER");
+            User current = console.getAttribute ("user");
             if (userName == null) {
-                userName = current;
-            } else if (!"root".equals (current) && !current.equals (userName)) {
+                userName = current.getUserName ();
+            } else if (!"root".equals (current.getUserName ()) && !current.getUserName ().equals (userName)) {
                 console.errorln ("You are not authorized to execute this command.");
                 return;
             }
 
-            User currentUser = database.getByPK (User.class, current);
+//            User currentUser = database.getByPK (User.class, current);
             console.write ("Please input current password: ");
             String current_password = console.readInput (true);
 
             String md5 = StringUtil.dump (AlgorithmUtil.md5 (current_password.getBytes ())).toLowerCase ();
-            if (!md5.equals (currentUser.getPassword ())) {
+            if (!md5.equals (current.getPassword ())) {
                 console.errorln ("current password mismatched.");
                 return;
             }
@@ -55,8 +56,8 @@ public class PasswordCommand extends Command {
                 return;
             }
 
-            User user = currentUser;
-            if (!current.equals (userName)) {
+            User user = current;
+            if (!current.getUserName ().equals (userName)) {
                 user = database.getByPK (User.class, userName);
             }
 

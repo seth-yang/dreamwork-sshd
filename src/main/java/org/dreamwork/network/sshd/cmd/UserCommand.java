@@ -42,8 +42,9 @@ public class UserCommand extends Command {
     @Override
     public void perform (Console console) throws IOException {
         try {
-            String current = console.getEnv ("USER");
-            if (!"root".equals (current)) {
+//            String current = console.getEnv ("USER");
+            User current = console.getAttribute ("USER");
+            if (!"root".equals (current.getUserName ())) {
                 console.errorln ("You are not authorized to execute this command.");
                 return;
             }
@@ -87,6 +88,10 @@ public class UserCommand extends Command {
                     break;
                 case "del":
                 case "delete":
+                    if ("root".equals (userName)) {
+                        console.errorln ("you CAN NOT delete user root.");
+                        break;
+                    }
                     if (user != null) {
                         Boolean answer = console.option ("Are you sure to delete the user", false);
                         if (answer != null && answer) {

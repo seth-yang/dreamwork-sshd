@@ -1,39 +1,60 @@
 # dreamwork-sshd
 
-#### 介绍
-{**以下是码云平台说明，您可以替换此简介**
-码云是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用码云实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+### 介绍
+使用 apache sshd 框架，提供一个可用的 sshd 服务器端半成品。快速开发基于 ssh 的 CLI应用程序。
 
-#### 软件架构
-软件架构说明
+### 软件架构
+- 底层采用 `apache sshd` 框架来提供 `SSH` 网络服务。
+- 内置一个实现了
+  * RFC 318 (TELNET), 
+  * RFC 854 – RFC 861 (TELNET sub-options)
+  * RFC 1073 (TELNET Window Size)
+  
+  telnet协议栈的 java 实现
+- 扩展 `org.dreamwork.telnet.command.Command` 以快速开发命令来实现功能
+
+### 使用说明
+
+#### 最简单的例子：
+```java
+import org.dreamwork.config.IConfiguration;
+import org.dreamwork.config.PropertyConfiguration;
+import org.dreamwork.network.sshd.Sshd;
+
+import java.util.Properties;
+
+public class MySshdApplication {
+    public static void main (String[] args) throws Exception {
+        IConfiguration conf = new PropertyConfiguration (new Properties ());
+
+        Sshd sshd = new Sshd (conf);
+        sshd.init (null);
+        sshd.bind ();
+    }
+}
+```
+然后通过命令 
+```shell script
+ssh -p 50022 root@127.0.0.1
+```
+来登录服务，root的默认密码是`123456`。您可以在登录到sshd服务后使用`passwd`命令来修改root的密码
+
+#### 配置 sshd 服务
+- sshd 服务默认监听 `50022` 端口
+- ca 文件的默认存储位置是 ${user.home}/.ssh-server/known-hosts
+- sqlite 数据库文件的默认存储位置是 ${user.home}/.ssh-server/database.db
+
+您可以通过配置来修改这些参数
+- 键值 `service.sshd.port` 用来修改监听端口
+- 键值 `service.sshd.cert.file` 用来修改 ca 文件的存放路径
+- 键值 `database.file` 用来修改 sqlite 数据库文件的存放路径
 
 
-#### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
 
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
+### 参与贡献
 
 1.  Fork 本仓库
 2.  新建 Feat_xxx 分支
 3.  提交代码
 4.  新建 Pull Request
-
-
-#### 码云特技
-
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)

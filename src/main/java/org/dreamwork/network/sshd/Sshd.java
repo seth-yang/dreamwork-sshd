@@ -38,7 +38,11 @@ public class Sshd {
         if (database != null) {
             this.database = database;
         } else {
-            this.database = createDatabase (conf.getString (CFG_DB_FILE));
+            String dbFile = conf.getString (CFG_DB_FILE);
+            if (dbFile == null) {
+                dbFile = System.getProperty ("user.home") + "/.ssh-server/database.db";
+            }
+            this.database = createDatabase (dbFile);
         }
         shell.setDatabase (this.database);
 
@@ -94,12 +98,17 @@ public class Sshd {
             logger.trace ("starting the sshd server ...");
         }
 
+        String caRoot = conf.getString (Keys.CFG_SSHD_CA_DIR);
+        if (StringUtil.isEmpty (caRoot)) {
+            caRoot = System.getProperty ("user.home") + "/.ssh-server/known-hosts";
+        }
+
         int port = conf.getInt (Keys.CFG_SSHD_PORT, 50022);
         server = SshServer.setUpDefaultServer ();
         server.setHost ("0.0.0.0");
         server.setPort (port);
         server.setPasswordAuthenticator (new DatabaseAuthenticator (database));
-        server.setKeyPairProvider (new FileSystemHostKeyProvider (conf.getString (Keys.CFG_SSHD_CA_DIR)));
+        server.setKeyPairProvider (new FileSystemHostKeyProvider (caRoot));
         server.setShellFactory (channel -> shell);
         shell.registerCommands (
                 new PasswordCommand (database),
@@ -108,8 +117,8 @@ public class Sshd {
         );
         server.start ();
 
-        if (logger.isTraceEnabled ()) {
-            logger.trace ("sshd server listen on {}:{}", server.getHost (), port);
+        if (logger.isInfoEnabled ()) {
+            logger.info ("sshd server listen on {}:{}", server.getHost (), port);
         }
     }
 

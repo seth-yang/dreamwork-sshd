@@ -36,7 +36,7 @@ public class BasicSshdApplication {
 }
 ```
 然后通过命令 
-```shell script
+```text
 ssh -p 50022 root@127.0.0.1
 ```
 来登录服务，root的默认密码是`123456`。您可以在登录到sshd服务后使用`passwd`命令来修改root的密码
@@ -63,7 +63,7 @@ ssh -p 50022 root@127.0.0.1
 命令为`sshd-server`提供一组特定功能的人机接口，通过在 `org.dreamwork.network.sshd.Sshd`上注册 `org.dreamwork.telnet.command.Command`的实现类来提供服务。
 ### 内置命令
 在上面的基础实现中，`sshd-server` 内置了一组命令，您可以登陆服务后通过命令 `help`来查看：
-```shell script
+```text
 console> h
 clear            clear the screen and home cursor
 echo             shows something
@@ -135,7 +135,7 @@ public class BasicSshdApplication {
 }
 ```
 再次启动程序，并使用 ssh 命令登录到付，键入 help 命令，查看
-```shell script
+```text
 console> h
 clear            clear the screen and home cursor
 datetime         show current date time
@@ -156,7 +156,7 @@ user             user management
 datetime         show current date time
 ```
 执行命令
-```shell script
+```text
 console> datetime
 2020-02-25 19:37:41
 console>

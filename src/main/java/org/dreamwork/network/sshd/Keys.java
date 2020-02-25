@@ -7,6 +7,7 @@ class Keys {
             KEY_IN                   = PACKET_NAME + "KEY_IN",
             KEY_OUT                  = PACKET_NAME + "KEY_OUT",
             KEY_ERR                  = PACKET_NAME + "KEY_ERR",
+            CFT_DEFAULT_ROOT_PWD     = "default.root.password",
             CFG_SSHD_PORT            = "service.sshd.port",
             CFG_SSHD_CA_DIR          = "service.sshd.cert.file",
             CFG_DB_FILE              = "database.file";

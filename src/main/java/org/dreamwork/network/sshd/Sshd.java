@@ -2,6 +2,7 @@ package org.dreamwork.network.sshd;
 
 import org.apache.sshd.server.SshServer;
 import org.dreamwork.config.IConfiguration;
+import org.dreamwork.config.PropertyConfiguration;
 import org.dreamwork.db.IDatabase;
 import org.dreamwork.db.SQLite;
 import org.dreamwork.misc.AlgorithmUtil;
@@ -83,7 +84,12 @@ public class Sshd {
                 logger.trace ("table created.");
             }
 
-            byte[] buff = "123456".getBytes ();
+            String default_password = conf.getString (Keys.CFT_DEFAULT_ROOT_PWD);
+            if (StringUtil.isEmpty (default_password)) {
+                default_password = "123456";
+            }
+
+            byte[] buff = default_password.getBytes ();
             buff = AlgorithmUtil.md5 (buff);
             String password = StringUtil.byte2hex (buff, false);
             User user = new User ();
@@ -103,7 +109,7 @@ public class Sshd {
             caRoot = System.getProperty ("user.home") + "/.ssh-server/known-hosts";
         }
 
-        int port = conf.getInt (Keys.CFG_SSHD_PORT, 50022);
+        int port = getInt (Keys.CFG_SSHD_PORT, 50022);
         server = SshServer.setUpDefaultServer ();
         server.setHost ("0.0.0.0");
         server.setPort (port);
@@ -135,5 +141,21 @@ public class Sshd {
     public Sshd registerCommands (Command... commands) {
         shell.registerCommands (commands);
         return this;
+    }
+
+    private int getInt (String key, int defaultValue) {
+        String value = conf.getString (key);
+        if (!StringUtil.isEmpty (value)) {
+            value = value.trim ();
+            ((PropertyConfiguration) conf).setRawProperty (key, value);
+
+            try {
+                return Integer.parseInt (value);
+            } catch (NumberFormatException nfe) {
+                return defaultValue;
+            }
+        } else {
+            return defaultValue;
+        }
     }
 }

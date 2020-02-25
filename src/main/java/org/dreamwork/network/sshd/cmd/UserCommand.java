@@ -42,8 +42,7 @@ public class UserCommand extends Command {
     @Override
     public void perform (Console console) throws IOException {
         try {
-//            String current = console.getEnv ("USER");
-            User current = console.getAttribute ("USER");
+            User current = console.getAttribute ("user");
             if (!"root".equals (current.getUserName ())) {
                 console.errorln ("You are not authorized to execute this command.");
                 return;

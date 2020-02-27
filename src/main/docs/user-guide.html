@@ -8,11 +8,74 @@
 
     <script type="text/javascript" charset="utf-8" src="https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="highlight-js/highlight.pack.js"></script>
+    <script type="text/javascript" charset="utf-8" src="highlight-js/highlightjs-line-numbers.js"></script>
 </head>
 <body>
     <h2>Dreamwork SSHD-Server 用户手册</h2>
     <h3>导入依赖</h3>
+    <ol>
+        <li>
+            从 gitee 克隆 `dreamwork-base` 的 3.0.4 分支，然后安装到本地的 maven 仓库。
+            <p class="notice">这是 `dreamwork-sshd-server` 依赖的唯一一个非标的库。</p>
+    <pre><code class="shell">git clone -b 3.0.4 https://gitee.com/seth_yang/dreamwork-base.git
+mvn install</code></pre>
+        </li>
+        <li>
+            从 gitee 克隆 `dreamwork-sshd-server` 的 1.0.0 分支, 并安装到本地 maven 仓库
+            <pre><code class="shell">git clone -b 1.0.0 https://gitee.com/seth_yang/dreamwork-sshd.git
+mvn install</code></pre>
+        </li>
+        <li>
+            然后在您项目的 pom 文件中添加 `dreamwork-sshd-server` 1.0.0 的依赖。
+            <p class="notice">如果您希望 dreamwork-sshd-server 独立使用内置的 sqlite 数据库，您还需要添加 sqlite 的依赖</p>
+            <pre><code class="xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.dreamwork&lt;/groupId&gt;
+        &lt;artifactId&gt;dreamwork-sshd&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.xerial&lt;/groupId&gt;
+        &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;
+        &lt;version&gt;3.28.0&lt;/version&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+        </li>
+    </ol>
 
-<script>hljs.initHighlightingOnLoad();</script>
+    <h3>第一个 SSHD-Based 应用程序</h3>
+    <pre><code class="java">package org.dreamwork.sshd.example;
+
+import org.dreamwork.config.IConfiguration;
+import org.dreamwork.config.PropertyConfiguration;
+import org.dreamwork.network.sshd.Sshd;
+
+import java.util.Properties;
+
+public class BasicSshdApplication {
+    public static void main (String[] args) throws Exception {
+        IConfiguration conf = new PropertyConfiguration (new Properties ());
+
+        Sshd sshd = new Sshd (conf);
+        sshd.init (null);
+        sshd.bind ();
+    }
+}</code></pre>
+
+<h4>配置 SSHD-Server</h4>
+<ul>
+    <li>键值 <code>service.sshd.port</code> 用来修改监听端口，默认为 <code>50022</code> </li>
+    <li>键值 <code>service.sshd.cert.file</code> 用来修改 ca 文件的存放路径, 默认<code>${user.home}/.ssh-server/known-hosts</code></li>
+    <li>键值 <code>database.file</code> 用来修改 sqlite 数据库文件的存放路径, 默认<code>${user.home}/.ssh-server/database.db</code></li>
+    <li>键值 <code>default.root.password</code> 用来修改默认的root密码, 默认为 <code>123456</code></li>
+</ul>
+以上所有键值都可通过添加系统属性来覆盖默认值，即通过添加 VM 参数 <code>-Dxxxx=yyyy</code>的方式覆盖
+
+<h4>关于内置数据库</h4>
+<code>org.dreamwork.network.sshd.Sshd</code> 通过 <code>init (IDatabase)</code> 方法传入一个数据库对象，当该方法传参为 <code>null</code> 时，
+内部将创建一个 sqlite3 文件数据库。 当您希望 sshd-server 和您的应用共用一个数据库时，该方法的参数必须是一个 <strong>非空</strong> 的数据库对象。
+
+<script type="text/javascript" charset="utf-8" src="js/code.js"></script>
 </body>
 </html>

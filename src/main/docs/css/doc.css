@@ -9,7 +9,7 @@ code {
 
 td {padding: 10px;}
 
-.code-snip {
+.code-snip, code {
     display:inline-block; font-family: 'Source Code Pro', 'Courier New', Courier, monospace; 
     padding:1px 3px; margin: 0 3px; border:1px solid #ccc; border-radius:5px; background-color:#efefef
 }
@@ -24,3 +24,31 @@ td.param-desc { width: 100% }
 
 a {color: dodgerblue; text-decoration: none; cursor: pointer;}
 a:hover {text-decoration: underline;}
+
+p.notice { font-style: italic;}
+
+.hljs[data-ln], code.hljs.java,code.hljs.xml,code.hljs.properties {padding: 0}
+.hljs-ln{border-collapse:collapse;width:100%}
+.hljs-ln td.hljs-ln-numbers{padding:3px 10px;white-space: nowrap;}.hljs-ln td.hljs-ln-code{padding:3px 10px;width:100%}
+.hljs-ln tr:first-child td {padding-top:10px;}.hljs-ln tr:last-child td {padding-bottom:10px;}
+.hljs-ln-n:before{content:attr(data-line-number)}
+
+.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    border-right: 1px solid #bababa;
+    vertical-align: top;
+    padding-right: 5px;
+}
+.hljs-ln-code {
+    padding-left: 10px;
+}
+.hljs-ln-row-selected {
+    background-color: #3a3a3a;
+}

@@ -109,9 +109,9 @@ import org.dreamwork.telnet.command.Command;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class DateTimeCommand extends Command {
+public class SimpleDateTimeCommand extends Command {
     private SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
-    public DateTimeCommand () {
+    public SimpleDateTimeCommand () {
         super ("datetime", null, "show current date time");
     }
 
@@ -147,8 +147,8 @@ public class DateTimeCommand extends Command {
         Sshd sshd = new Sshd (conf);
         sshd.init (null);
 
-        // 注册 DateTimeCommand
-        sshd.registerCommands (new DateTimeCommand ());
+        // 注册 SimpleDateTimeCommand
+        sshd.registerCommands (new SimpleDateTimeCommand ());
 
         sshd.bind ();
     }

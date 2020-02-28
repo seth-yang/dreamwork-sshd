@@ -52,3 +52,11 @@ p.notice { font-style: italic;}
 .hljs-ln-row-selected {
     background-color: #3a3a3a;
 }
+
+.simple-list {margin: 20px 0;}
+.simple-list, .simple-list td  {border:1px solid #ccc; border-collapse: collapse;}
+.simple-list td {vertical-align: top;}
+.simple-list tr:nth-child(odd) {background-color:#eee;}
+.cmd-name, .cmd-alias {font-family: 'Source Code Pro', 'Courier New', Courier, monospace; white-space: nowrap;}
+.cmd-alias {text-align:center}
+.warning-hint {color:orange;}

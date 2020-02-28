@@ -179,7 +179,7 @@ public interface ICommand {
      * @param text 输入的文本
      * @return 可能合法的后续输入.
      */
-    default List<String> guess (String text) {
+    default List&lt;String&gt; guess (String text) {
         return null;
     }
 }

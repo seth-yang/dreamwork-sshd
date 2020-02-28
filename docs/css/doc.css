@@ -1,0 +1,62 @@
+html, body, p, div, td, li, a, span {font-size: 16px;}
+body, li {line-height: 150%;}
+/* html, body, p, div, td, li, a, span, h1, h2, h3, h4, h5, h6 {background-color: #f8f8f8; color:#333;} */
+
+code {
+    font-family: 'Source Code Pro', 'Courier New', Courier, monospace; font-size: 16px; 
+}
+.hljs {padding: 10px}
+
+td {padding: 10px;}
+
+.code-snip, code {
+    display:inline-block; font-family: 'Source Code Pro', 'Courier New', Courier, monospace; 
+    padding:1px 3px; margin: 0 3px; border:1px solid #ccc; border-radius:5px; background-color:#efefef
+}
+.hljs-meta {color:#bbb529}
+
+table.method-list {margin-left: 25px;}
+.method-list td {padding: 10px;}
+td.method-def {font-family: 'Source Code Pro', 'Courier New', Courier, monospace; border-top: 4px solid orange; background-color: #2b2b2b; color: darkgrey;}
+td.param-name {font-family: 'Source Code Pro', 'Courier New', Courier, monospace; white-space: nowrap; padding-left:35px}
+td.param-name:before {content: '· '}
+td.param-desc { width: 100% }
+
+a {color: dodgerblue; text-decoration: none; cursor: pointer;}
+a:hover {text-decoration: underline;}
+
+p.notice { font-style: italic;}
+
+.hljs[data-ln], code.hljs.java,code.hljs.xml,code.hljs.properties {padding: 0}
+.hljs-ln{border-collapse:collapse;width:100%}
+.hljs-ln td.hljs-ln-numbers{padding:3px 10px;white-space: nowrap;}.hljs-ln td.hljs-ln-code{padding:3px 10px;width:100%}
+.hljs-ln tr:first-child td {padding-top:10px;}.hljs-ln tr:last-child td {padding-bottom:10px;}
+.hljs-ln-n:before{content:attr(data-line-number)}
+
+.hljs-ln-numbers {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    text-align: right;
+    border-right: 1px solid #bababa;
+    vertical-align: top;
+    padding-right: 5px;
+}
+.hljs-ln-code {
+    padding-left: 10px;
+}
+.hljs-ln-row-selected {
+    background-color: #3a3a3a;
+}
+
+.simple-list {margin: 20px 0;}
+.simple-list, .simple-list td  {border:1px solid #ccc; border-collapse: collapse;}
+.simple-list td {vertical-align: top;}
+.simple-list tr:nth-child(odd) {background-color:#eee;}
+.cmd-name, .cmd-alias {font-family: 'Source Code Pro', 'Courier New', Courier, monospace; white-space: nowrap;}
+.cmd-alias {text-align:center}
+.warning-hint {color:orange;}

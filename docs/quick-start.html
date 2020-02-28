@@ -8,6 +8,7 @@
 
     <script type="text/javascript" charset="utf-8" src="https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf-8" src="highlight-js/highlight.pack.js"></script>
+    <script type="text/javascript" charset="utf-8" src="highlight-js/highlightjs-line-numbers.js"></script>
 </head>
 <body>
     <h2>Dreamwork SSHD-Server</h2>
@@ -28,8 +29,7 @@
     </ul>
     <h3>使用说明</h3>
     <h4>最简单的例子</h4>
-    <pre><code class="java">
-package org.dreamwork.sshd.example;
+    <pre><code class="java" data-ln="true">package org.dreamwork.sshd.example;
 
 import org.dreamwork.config.IConfiguration;
 import org.dreamwork.config.PropertyConfiguration;
@@ -83,8 +83,7 @@ public class BasicSshdApplication {
     <h4>内置命令</h4>
     在上面的基础实现中，<span class='code-snip'>sshd-server</span> 内置了一组命令，
     您可以登陆服务后通过命令 <span class='code-snip'>help</span>来查看：
-    <pre><code class="shell">
-console> help
+    <pre><code class="shell">console> help
 clear            clear the screen and home cursor
 echo             shows something
 env              show environment
@@ -102,8 +101,7 @@ user             user management
     通过扩展 <span class='code-snip'>org.dreamwork.telnet.command.Command</span>抽象类来自定义命令。
     <h5>一个简单的自定义命令</h5>
     我们来实现一个简单的命令：<span class='code-snip'>datetime</span>，来实现显示当前时间
-    <pre><code class="java">
-package org.dreamwork.sshd.example;
+    <pre><code class="java">package org.dreamwork.sshd.example;
 
 import org.dreamwork.telnet.Console;
 import org.dreamwork.telnet.command.Command;
@@ -111,9 +109,9 @@ import org.dreamwork.telnet.command.Command;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
-public class DateTimeCommand extends Command {
+public class SimpleDateTimeCommand extends Command {
     private SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
-    public DateTimeCommand () {
+    public SimpleDateTimeCommand () {
         super ("datetime", null, "show current date time");
     }
 
@@ -142,24 +140,22 @@ public class DateTimeCommand extends Command {
         <tr><td class="param-name">console</td><td>即控制台对象，可以打印命令处理结果</td></tr>
     </table>
     现在，我们可以将这个命令注册到<span class='code-snip'>sshd-server</span>中了
-    <pre><code class="java">
-public class BasicSshdApplication {
+    <pre><code class="java">public class BasicSshdApplication {
     public static void main (String[] args) throws Exception {
         IConfiguration conf = new PropertyConfiguration (new Properties ());
 
         Sshd sshd = new Sshd (conf);
         sshd.init (null);
 
-        // 注册 DateTimeCommand
-        sshd.registerCommands (new DateTimeCommand ());
+        // 注册 SimpleDateTimeCommand
+        sshd.registerCommands (new SimpleDateTimeCommand ());
 
         sshd.bind ();
     }
 }
     </code></pre>
     再次启动程序，并使用 ssh 命令登录到付，键入 help 命令，查看
-    <pre><code class="shell">
-console> h
+    <pre><code class="shell">console> h
 clear            clear the screen and home cursor
 <strong>datetime         show current date time</strong>
 echo             shows something
@@ -175,13 +171,12 @@ unset            unset a console env
 user             user management
     </code></pre>
     可以发现多了一个命令 <span class='code-snip'>datetime</span>，执行命令
-    <pre><code class="shell">
-console> datetime
+    <pre><code class="shell">console> datetime
 2020-02-25 19:37:41
 console>
     </code></pre>
     <h3>深入<span class='code-snip'>sshd-server</span>及<span class='code-snip'>Command</span></h3>
     更高级/深入的内容请参见 "<a href="user-guide.html">sshd-server 使用手册</a>"
-<script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript" charset="utf-8" src="js/code.js"></script>
 </body>
 </html>

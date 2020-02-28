@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dreamwork SSHD-Server</title>
+    <link rel='stylesheet' type="text/css" charset='utf-8' href="highlight-js/styles/darcula.css" />
+    <link rel='stylesheet' type='text/css' charset='utf-8' href="css/doc.css" />
+
+    <script type="text/javascript" charset="utf-8" src="https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="highlight-js/highlight.pack.js"></script>
+    <script type="text/javascript" charset="utf-8" src="highlight-js/highlightjs-line-numbers.js"></script>
+</head>
+<body>
+    <h2>Dreamwork SSHD-Server 用户手册</h2>
+    <h3>导入依赖</h3>
+    <ol>
+        <li>
+            从 gitee 克隆 `dreamwork-base` 的 3.0.4 分支，然后安装到本地的 maven 仓库。
+            <p class="notice">这是 `dreamwork-sshd-server` 依赖的唯一一个非标的库。</p>
+    <pre><code class="shell">git clone -b 3.0.4 https://gitee.com/seth_yang/dreamwork-base.git
+mvn install</code></pre>
+        </li>
+        <li>
+            从 gitee 克隆 `dreamwork-sshd-server` 的 1.0.0 分支, 并安装到本地 maven 仓库
+            <pre><code class="shell">git clone -b 1.0.0 https://gitee.com/seth_yang/dreamwork-sshd.git
+mvn install</code></pre>
+        </li>
+        <li>
+            然后在您项目的 pom 文件中添加 `dreamwork-sshd-server` 1.0.0 的依赖。
+            <p class="notice">如果您希望 dreamwork-sshd-server 独立使用内置的 sqlite 数据库，您还需要添加 sqlite 的依赖</p>
+            <pre><code class="xml">&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.dreamwork&lt;/groupId&gt;
+        &lt;artifactId&gt;dreamwork-sshd&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.xerial&lt;/groupId&gt;
+        &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;
+        &lt;version&gt;3.28.0&lt;/version&gt;
+        &lt;scope&gt;runtime&lt;/scope&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+        </li>
+    </ol>
+
+    <h3>第一个 SSHD-Based 应用程序</h3>
+    <pre><code class="java">package org.dreamwork.sshd.example;
+
+import org.dreamwork.config.IConfiguration;
+import org.dreamwork.config.PropertyConfiguration;
+import org.dreamwork.network.sshd.Sshd;
+
+import java.util.Properties;
+
+public class BasicSshdApplication {
+    public static void main (String[] args) throws Exception {
+        IConfiguration conf = new PropertyConfiguration (new Properties ());
+
+        Sshd sshd = new Sshd (conf);
+        sshd.init (null);
+        sshd.bind ();
+    }
+}</code></pre>
+
+<h4>配置 SSHD-Server</h4>
+<ul>
+    <li>键值 <code>service.sshd.port</code> 用来修改监听端口，默认为 <code>50022</code> </li>
+    <li>键值 <code>service.sshd.cert.file</code> 用来修改 ca 文件的存放路径, 默认<code>${user.home}/.ssh-server/known-hosts</code></li>
+    <li>键值 <code>database.file</code> 用来修改 sqlite 数据库文件的存放路径, 默认<code>${user.home}/.ssh-server/database.db</code></li>
+    <li>键值 <code>default.root.password</code> 用来修改默认的root密码, 默认为 <code>123456</code></li>
+</ul>
+<i>以上所有键值都可通过添加系统属性来覆盖默认值，即通过添加 VM 参数 <code>-Dxxxx=yyyy</code>的方式覆盖</i>
+
+<p>运行这个程序，将监听本机的 50022 端口，可以使用 ssh 命令登录服务， root 默认密码 123456; 登陆后，可以键入命令 help 来查看帮助</p>
+<pre><code class="shell">console> h
+clear            clear the screen and home cursor
+echo             shows something
+env              show environment
+exit             alias for command 'quit'
+help        h    show this help list
+history          show history
+passwd           change current or spec user's password
+quit        q    exit
+set              setting console env
+shutdown         shutdown the sshd server
+unset            unset a console env
+user             user management
+console> </code></pre>
+<i class="warning-hint">您应尽快使用 passwd 命令来修改 root 密码</i>
+<h4>关于内置数据库</h4>
+<code>org.dreamwork.network.sshd.Sshd</code> 通过 <code>init (IDatabase)</code> 方法传入一个数据库对象，当该方法传参为 <code>null</code> 时，
+内部将创建一个 sqlite3 文件数据库。 当您希望 sshd-server 和您的应用共用一个数据库时，该方法的参数必须是一个 <strong>非空</strong> 的数据库对象。
+
+<h4>使用外部数据库</h4>
+<pre><code class="java">// ... 
+javax.sql.DataSource datasource = getSomePostgresDS (); // 这是一个示意方法，表示通过某种方式获取 postgres 数据库的数据源
+org.dreamwork.db.IDatabase postgres = new org.dreamwork.db.PostgreSQL (datasource);
+sshd.init (postgres);
+// ...
+</code></pre>
+以上示例演示了使用外部数据库的方式。
+
+<h3>命令</h3>
+<code>dreamwork-sshd-server</code> 使用命令来提供功能服务，这些命令是 <code>org.dreamwork.telnet.command.Command</code> 的子类。
+<h4>内置命令</h4>
+<code>dreamwork-sshd-server</code> 提供了一些内置的命令，对服务器进行基本的维护工作
+<table class="simple-list">
+    <tr><td>名称</td><td>快捷方式</td><td>简单描述</td></tr>
+    <tr><td class='cmd-name'>clear</td><td></td><td class="cmd-desc">清除当前屏幕，并将光标置于左上角</td></tr>
+    <tr>
+        <td class="cmd-name">echo</td><td></td><td class="cmd-desc">
+            回显某些值，如 <ul>
+                <li><code>echo "abc"</code> 将直接回显 abc 字符串</li>
+                <li><code>echo $path</code> 将回显环境变量 $path 的值</li>
+            </ul>
+        </td>
+    </tr>
+    <tr><td class="cmd-name">evn</td><td></td><td class="cmd-desc">显示所有的当前环境变量</td></tr>
+    <tr><td class="cmd-name">exit</td><td></td><td class="cmd-desc">退出当前终端</td></tr>
+    <tr><td class="cmd-name">help</td><td class="cmd-alias">h</td>
+        <td class="cmd-desc">当无参的时候，显示帮助列表，当参数为某个命令时，显示目标命令的帮助</td>
+    </tr>
+    <tr><td class="cmd-name">history</td><td></td><td class="cmd-desc">显示当前会话的历史命令</td></tr>
+    <tr><td class="cmd-name">passwd</td><td></td>
+        <td class="cmd-desc">
+            <ul>
+                <li>若无参数，更改当前用户的登录密码</li>
+                <li>若有参数，更改参数所指定的用户的登录密码。<i class="warning-hint">只有 root 用户可以使用</i></li>
+            </ul>
+        </td>
+    </tr>
+    <tr><td class="cmd-name">quit</td><td class="cmd-alias">q</td><td class="cmd-desc">退出当前终端</td></tr>
+    <tr><td class="cmd-name">set</td><td></td><td class="cmd-desc">设置或更新当前会话环境变量</td></tr>
+    <tr><td class="cmd-name">shutdown</td><td></td><td class="cmd-desc">关闭 sshd-server，<i class="warning-hint">只有 root 用户可以使用</i></td></tr>
+    <tr><td class="cmd-name">usset</td><td></td><td class="cmd-desc">删除当前会话的环境变量</td></tr>
+    <tr><td class="cmd-name">user</td><td></td><td class="cmd-desc">用户管理命令，详情请使用命令： user --hlep 来查询。<i class="warning-hint">只有 root 用户可使用</i></td></tr>
+</table>
+<i>所有命令都可通过 &lt;command&gt; --help 来查询详细的帮助信息</i>
+<h4>扩展命令</h4>
+<h5>org.dreamwork.telnet.command.ICommand 接口</h5>
+<pre><code class="java">package org.dreamwork.telnet.command;
+
+import org.dreamwork.telnet.Console;
+
+import java.io.IOException;
+import java.util.List;
+
+public interface ICommand {
+    default void parse (String... options) {
+    }
+
+    void setContent (String content);
+
+    void showHelp (Console console) throws IOException;
+
+    /**
+     * 命令是否支持选项
+     */
+    default boolean isOptionSupported () {
+        return false;
+    }
+
+    /**
+     * 执行命令
+     * @param console   当前控制台
+     * @throws IOException io exception
+     */
+    void perform (Console console) throws IOException;
+
+    /**
+     * 根据输入的文本猜测可能合法的后续输入.
+     * &lt;ul&gt;
+     *     &lt;li&gt;如果猜测无结果，且不希望改变当前输入，返回 null&lt;/li&gt;
+     *     &lt;li&gt;如果猜测无结果，但当前输入有无效，希望控制台修正为命令本身，返回0元素的列表&lt;/li&gt;
+     *     &lt;li&gt;如果能够确定匹配后续输入，返回一条确切记录&lt;/li&gt;
+     *     &lt;li&gt;如果能够猜测出多条可能的输入，返回一个列表&lt;/li&gt;
+     * &lt;/ul&gt;
+     * @param text 输入的文本
+     * @return 可能合法的后续输入.
+     */
+    default List&lt;String&gt; guess (String text) {
+        return null;
+    }
+}
+</code></pre>
+<h5>org.dreamwork.telnet.command.Command 类</h5>
+org.dreamwork.telnet.command.Command 类是 ICommand 接口的默认实现，实际上 sshd-server 使用的是这个默认实现，而非接口
+<pre><code>public Sshd registerCommands (Command... commands)</code></pre>
+<pre><code class="java">package org.dreamwork.telnet.command;
+
+import org.dreamwork.util.StringUtil;
+
+public abstract class Command implements ICommand {
+    public final String alias;
+    public final String name;
+    public final String desc;
+
+    protected String content;
+
+    public Command (String name, String alias, String desc) {
+        if (StringUtil.isEmpty (name)) {
+            throw new NullPointerException ("the name would not be null!");
+        }
+        this.name  = name;
+        this.alias = alias;
+        this.desc  = desc;
+    }
+
+    @Override
+    public void setContent (String content) {
+        this.content = content;
+    }
+
+    /**
+     * 简单的显示命令的简要描述
+     * 若需要提供详细的命令帮助，应该覆盖该方法
+     */
+    @Override
+    public void showHelp (Console console) throws IOException {
+        console.println (desc);
+    }
+}</code></pre>
+<h5>实现一个简单的命令</h5>
+我们这里实现命令 SimpleDateTimeCommand，用于简单的显示当前的时间
+<pre><code class="java">package org.dreamwork.sshd.example;
+
+import org.dreamwork.telnet.Console;
+import org.dreamwork.telnet.command.Command;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+public class SimpleDateTimeCommand extends Command {
+    private SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
+    public SimpleDateTimeCommand () {
+        super ("datetime", "dt", "show current date time");
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param console 当前控制台
+     * @throws IOException io exception
+     */
+    @Override
+    public void perform (Console console) throws IOException {
+        console.println (sdf.format (System.currentTimeMillis ()));
+    }
+}</code></pre>
+然后注册到 sshd-server 中
+<pre><code class="java">public class BasicSshdApplication {
+    public static void main (String[] args) throws Exception {
+        IConfiguration conf = new PropertyConfiguration (new Properties ());
+
+        Sshd sshd = new Sshd (conf);
+        sshd.init (null);
+
+        // 注册 SimpleDateTimeCommand
+        <strong>sshd.registerCommands (new SimpleDateTimeCommand ());</strong>
+
+        sshd.bind ();
+    }
+}</code></pre>
+重新启动服务，登录后，键入 help 命令，可以发现多了一个命令
+<pre><code class="shell">console> h
+clear            clear the screen and home cursor
+<strong>datetime    dt   show current date time</strong>
+echo             shows something
+env              show environment
+exit             alias for command 'quit'
+help        h    show this help list
+history          show history
+passwd           change current or spec user's password
+quit        q    exit
+set              setting console env
+shutdown         shutdown the sshd server
+unset            unset a console env
+user             user management
+console></code></pre> 现在，您可以执行 datetime 命令了。
+
+<h4>让命令支持参数</h4>
+在 ICommand 中，命令的参数被称为“选项”。若您希望命令支持参数，则 <code>ICommand.isOptionSupported</code> 必须返回 <strong>true</strong>，
+然后实现 <code>parse (String... options)</code> 方法。方法参数是在终端输入的，从<strong>命令名称到换行</strong>的部分，每个元素由空白字符分隔。
+如果单个选项内部包含空白字符，则需要用引号("和'都可以)包括起来。现在让我们来实现一个完整版的 datetime 命令，规划的功能看起来像：
+<pre><code class="shell">
+datetime -f &lt;format&gt; | --format=&lt;format&gt;  指定格式输出当前时间
+datetime --full                           java.text.DateFormat.FULL 格式输出
+datetime -l | --long                      java.text.DateFormat.LONG 格式输出
+datetime -m | --medium                    java.text.DateFormat.MEDIUM 格式输出
+datetime -s | --short                     java.text.DateFormat.SHORT 格式输出
+</code></pre>
+即，可以提供自定义 [合法的] Java DateFormat 支持的格式化串来输出当前时间，请看代码
+<pre><code class="java">package org.dreamwork.sshd.example;
+
+import org.dreamwork.telnet.Console;
+import org.dreamwork.telnet.TerminalIO;
+import org.dreamwork.telnet.command.Command;
+
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+public class FullDateTimeCommand extends Command {
+    private String pattern, errorMessage, action;
+    private int style = -1;
+
+    public FullDateTimeCommand () {
+        super ("datetime", "dt", "shows date time");
+    }
+
+    /**
+     * 命令是否支持选项
+     */
+    @Override
+    public boolean isOptionSupported () {
+        return true;
+    }
+
+    @Override
+    public void parse (String... options) {
+        String tmp;
+        if (options.length > 0) {
+            tmp = options [0];
+            switch (tmp) {
+                case "-h":
+                case "--help":
+                    action = "help";
+                    break;
+                case "--full":
+                    style = DateFormat.FULL;
+                    break;
+                case "-l":
+                case "--long":
+                    style = DateFormat.LONG;
+                    break;
+                case "-m":
+                case "--medium":
+                    style = DateFormat.MEDIUM;
+                    break;
+                case "-s":
+                case "--short":
+                    style = DateFormat.SHORT;
+                    break;
+                case "-f":
+                    if (options.length > 1) {
+                        pattern = options [1];
+                    } else {
+                        errorMessage = "format string is missing";
+                    }
+                    break;
+                default:
+                    if (tmp.startsWith ("--format=")) {
+                        pattern = tmp.substring ("--format=".length ());
+
+                        if (pattern.length () <= 0) {
+                            errorMessage = "format string is missing";
+                        }
+                    } else {
+                        errorMessage = "unknown option: " + tmp;
+                    }
+                    break;
+            }
+        }
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param console 当前控制台
+     * @throws IOException io exception
+     */
+    @Override
+    public void perform (Console console) throws IOException {
+        try {
+            // 先检查有没有错误
+            if (null != errorMessage) {
+                console.error (errorMessage);
+                return;
+            }
+
+            // 检查是否显示帮助
+            if ("help".equals (action)) {
+                showHelp (console);
+                return;
+            }
+
+            if (pattern == null && style == -1) {
+                // 命令行未提供任何参数，使用默认格式
+                pattern = "yyyy-MM-dd HH:mm:ss";
+                String result = new SimpleDateFormat (pattern).format (System.currentTimeMillis ());
+                console.println (result);
+            } else if (pattern != null) {
+                // 如果提供了格式字符串
+                String result;
+                try {
+                    result = new SimpleDateFormat (pattern).format (System.currentTimeMillis ());
+                } catch (Exception ex) {
+                    // 提供的格式字符串不能被 SimpleDateFormat 所采用，应该在控制台报错
+                    console.error ("format '" + pattern + "' is not supported.");
+                    return;
+                }
+                console.println (result);
+            } else {
+                // 提供了某种风格
+                DateFormat df = DateFormat.getDateTimeInstance (style, style);
+                console.println (df.format (System.currentTimeMillis ()));
+            }
+        } finally {
+            reset ();
+        }
+    }
+
+    @Override
+    public void showHelp (Console console) throws IOException {
+        console.setForegroundColor (TerminalIO.YELLOW);
+        console.println (
+                "datetime -h | --help                      显示这个帮助列表\n" +
+                "datetime -f &lt;format&gt; | --format=&lt;format&gt;  指定格式输出当前时间\n" +
+                "datetime --full                           以 java.text.DateFormat.FULL 格式输出\n" +
+                "datetime -l | --long                      以 java.text.DateFormat.LONG 格式输出\n" +
+                "datetime -m | --medium                    以 java.text.DateFormat.MEDIUM 格式输出\n" +
+                "datetime -s | --short                     以 java.text.DateFormat.SHORT 格式输出");
+        console.setForegroundColor (TerminalIO.COLORINIT);
+    }
+
+    private void reset () {
+        action       = null;
+        pattern      = null;
+        errorMessage = null;
+        style        = -1;
+    }
+}</code></pre>
+从 sshd-server 里替换掉 datetime 命令的实现
+<pre><code class="java">public static void main (String[] args) throws Exception {
+    IConfiguration conf = new PropertyConfiguration (new Properties ());
+
+    Sshd sshd = new Sshd (conf);
+    sshd.init (null);
+
+    // 注册 SimpleDateTimeCommand
+    sshd.registerCommands (new <strong>FullDateTimeCommand</strong> ());
+
+    sshd.bind ();
+}</code></pre>
+重启服务，测试一下新的 datetime 命令吧。
+
+<h3>会话终端 Console 对象</h3>
+<h4>终端的用户身份认证</h4>
+当用户通过 ssh 命令登录到 dreamwork-sshd-server 后，<code>org.dreamwork.telnet.Console</code>实例会保存这个用户的身份信息，可以通过
+<code>Console.getAttribute ("user")</code> 来获取用户身份，这句语句将返回 <code>org.dreamwork.network.sshd.data.User</code> 实例。
+内置用户 <strong>root</strong> 被默认为 sshd-server 内的超级用户，拥有最高权限。
+<h4>会话终端的环境变量</h4>
+可以通过 <code>String Console.getEnv (String)</code> 和 <code>Console.setEnv (String, String)</code> 来获取和设置会话的环境变量。
+<h4>终端控制</h4>
+Cosnoel 提供了一组接口让用户程序控制终端行为：
+<ul>
+    <li>一组控制/移动光标的接口，move开头的方法，及方法名中包含 cursor 的方法</li>
+    <li>一组控制当前字符擦除的接口，erase开头的一组方法</li>
+    <li>设置终端前景/背景颜色</li>
+    <li>设置字体分格的接口</li>
+    <li>以及获取终端窗口的几何属性</li>
+</ul>
+更多详细的信息请参阅 javadoc 文档
+<script type="text/javascript" charset="utf-8" src="js/code.js"></script>
+</body>
+</html>

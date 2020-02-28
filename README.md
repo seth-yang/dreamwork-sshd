@@ -163,7 +163,7 @@ console>
 ```
 
 ## 深入`sshd-server`及`Command`
-更高级/深入的内容请参见 "[sshd-server 使用手册](https://github.com)"
+更高级/深入的内容请参见 "[sshd-server 使用手册](https://seth-yang.github.io/dreamwork-sshd/user-guide.html)"
 
 ## 参与贡献
 

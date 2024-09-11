@@ -134,7 +134,7 @@ public class BasicSshdApplication {
     }
 }
 ```
-再次启动程序，并使用 ssh 命令登录到付，键入 help 命令，查看
+再次启动程序，并使用 ssh 命令登录到服务器，键入 help 命令，查看
 ```text
 console> h
 clear            clear the screen and home cursor
@@ -164,10 +164,3 @@ console>
 
 ## 深入`sshd-server`及`Command`
 更高级/深入的内容请参见 "[sshd-server 使用手册](https://seth-yang.github.io/dreamwork-sshd/user-guide.html)"
-
-## 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request

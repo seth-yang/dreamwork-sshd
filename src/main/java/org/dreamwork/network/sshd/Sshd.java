@@ -25,9 +25,9 @@ import static org.dreamwork.network.sshd.Keys.CFG_DB_FILE;
 
 public class Sshd {
     private static final Logger logger = LoggerFactory.getLogger (Sshd.class);
-    private MainShellCommand shell     = new MainShellCommand ();
+    private final MainShellCommand shell = new MainShellCommand ();
 
-    private IConfiguration conf;
+    private final IConfiguration conf;
     private IDatabase database;
     private SshServer server;
 
@@ -129,13 +129,10 @@ public class Sshd {
     }
 
     public void unbind () throws IOException {
-        if (shell != null) {
-            shell.notifyShutdown ();
-        }
+        shell.notifyShutdown ();
         if (server != null) {
             server.stop ();
         }
-        System.exit (0);
     }
 
     public Sshd registerCommands (Command... commands) {

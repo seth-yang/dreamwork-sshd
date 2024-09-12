@@ -6,7 +6,7 @@
 
     <groupId>io.github.seth-yang</groupId>
     <artifactId>dreamwork-sshd</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>dreamwork sshd</name>

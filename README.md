@@ -14,7 +14,14 @@
 - 扩展 `org.dreamwork.telnet.command.Command` 以快速开发命令来实现功能
 
 ## 使用说明
-
+依赖引入：
+```xml
+<dependency>
+    <groupId>io.github.seth-yang</groupId>
+    <artifactId>dreamwork-sshd</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 ### 最简单的例子：
 ```java
 package org.dreamwork.sshd.example;

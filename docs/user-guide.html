@@ -13,6 +13,20 @@
 <body>
     <h2>Dreamwork SSHD-Server 用户手册</h2>
     <h3>导入依赖</h3>
+    在您项目的 pom 文件中添加 `dreamwork-sshd-server` 1.0.0 的依赖。
+    <p class="notice">如果您希望 dreamwork-sshd-server 独立使用内置的 sqlite 数据库，您还需要添加 sqlite 的依赖</p>
+    <pre><code class="xml">&lt;dependency&gt;
+    &lt;groupId&gt;io.github.seth-yang&lt;/groupId&gt;
+    &lt;artifactId&gt;dreamwork-sshd&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.xerial&lt;/groupId&gt;
+    &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;
+    &lt;version&gt;3.28.0&lt;/version&gt;
+    &lt;scope&gt;runtime&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+<!--
     <ol>
         <li>
             从 gitee 克隆 `dreamwork-base` 的 3.0.4 分支，然后安装到本地的 maven 仓库。
@@ -26,23 +40,10 @@ mvn install</code></pre>
 mvn install</code></pre>
         </li>
         <li>
-            然后在您项目的 pom 文件中添加 `dreamwork-sshd-server` 1.0.0 的依赖。
-            <p class="notice">如果您希望 dreamwork-sshd-server 独立使用内置的 sqlite 数据库，您还需要添加 sqlite 的依赖</p>
-            <pre><code class="xml">&lt;dependencies&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.dreamwork&lt;/groupId&gt;
-        &lt;artifactId&gt;dreamwork-sshd&lt;/artifactId&gt;
-        &lt;version&gt;1.0.0&lt;/version&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.xerial&lt;/groupId&gt;
-        &lt;artifactId&gt;sqlite-jdbc&lt;/artifactId&gt;
-        &lt;version&gt;3.28.0&lt;/version&gt;
-        &lt;scope&gt;runtime&lt;/scope&gt;
-    &lt;/dependency&gt;
-&lt;/dependencies&gt;</code></pre>
+            然后
         </li>
     </ol>
+-->
 
     <h3>第一个 SSHD-Based 应用程序</h3>
     <pre><code class="java">package org.dreamwork.sshd.example;

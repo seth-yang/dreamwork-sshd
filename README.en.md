@@ -15,7 +15,14 @@ Java implementation of telnet protocol stack
 - Extend `org.dreamwork.telnet.command.Command` to quickly develop commands to implement functions
 
 ## Instructions
-
+Importing dependencies
+```xml
+<dependency>
+    <groupId>io.github.seth-yang</groupId>
+    <artifactId>dreamwork-sshd</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 ### The simplest example:
 ```java
 package org.dreamwork.sshd.example;
